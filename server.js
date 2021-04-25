@@ -1,29 +1,35 @@
-var path = require('path');
-var mysql = require('mysql');
-var express = require('express');
-var session = require('express-session');
-var bodyParser = require('body-parser');
+const mysql2 = require("mysql2");
 
-var app = express();
+const path = require("path");
+const mysql = require("mysql");
+const express = require("express");
+const session = require("express-session");
+const bodyParser = require("body-parser");
 
-app.use(session({
-	secret: 'secret',
-	resave: true,
-	saveUninitialized: true
-}));
+const { signUp } = require("./register");
 
-var http = require('http').Server(app);
+const app = express();
 
-var connection = mysql.createConnection({
-	host     : 'localhost',
-	user     : 'tester',
-	password : 'tester7',
-	database : 'main'
-});
+app.use(
+  session({
+    secret: "secret",
+    resave: true,
+    saveUninitialized: true,
+  })
+);
 
-app.use(express.static(path.join(__dirname, 'main')));
-app.use(express.static(path.join(__dirname, 'image')));
-app.use(bodyParser.urlencoded({extended : true}));
+const http = require("http").Server(app);
+
+// const connection = mysql2.createConnection({
+//   host: "localhost",
+//   user: "tester",
+//   password: "tester7",
+//   database: "main",
+// });
+
+app.use(express.static(path.join(__dirname, "main")));
+app.use(express.static(path.join(__dirname, "image")));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 /*
 function restrict(req, res, next) {
@@ -45,12 +51,12 @@ app.use('/', function(request, response, next) {
 	}
 });
 */
-app.get('/', function(request, response) {
-	response.sendFile(path.join(__dirname + '/index.html')); //check
+app.get("/", function (request, response) {
+  response.sendFile(path.join(__dirname + "/index.html")); //check
 });
 
-app.get('/login', function(request, response) {
-	response.sendFile(path.join(__dirname + '/login.html'));
+app.get("/login", function (request, response) {
+  response.sendFile(path.join(__dirname + "/login.html"));
 });
 /*
 app.post('/login', function(request, response) {
@@ -76,56 +82,64 @@ app.post('/login', function(request, response) {
 	}
 });
 */
-
-app.get('/signup', function(request, response) {
-	response.sendFile(path.join(__dirname + '/signup.html'));
+app.get("/test", function (req, res) {
+  return res.status(200).json({ message: "test" });
 });
 
+app.post("/signup", function (req, res) {
+  return signUp(req, res);
+});
 
 function CheckPasswordPattern(password) {
-	var pattern1 = /[0-9]/;
-	var pattern2 = /[a-zA-Z]/;
+  var pattern1 = /[0-9]/;
+  var pattern2 = /[a-zA-Z]/;
 
-	if(!pattern1.test(password) || !pattern2.test(password) || password.length < 8 ) {
-		response.send(" 비밀번호는 영문, 숫자를 포함하여 8자 이상이어야 합니다. ");
-		return false;
-	}
-	else {
-		return true;
-	}
+  if (!pattern1.test(password) || !pattern2.test(password) || password.length < 8) {
+    response.send(" 비밀번호는 영문, 숫자를 포함하여 8자 이상이어야 합니다. ");
+    return false;
+  } else {
+    return true;
+  }
 }
 
-app.post('/signup', function(request, response) {
-	var name = request.body.name; // 이름
-	var username = request.body.username; // ID
-	var password = request.body.password; // 비밀번호
-	var password2 = request.body.password2; //비밀번호 확인
-	var email = request.body.email; // 이메일
-	// 주소, 추가예정
-	console.log(name, username, password, email);
-	if (name && username && password && email) {
-		connection.query('SELECT * FROM user WHERE name = ? AND username = ? AND password = ? AND email = ?', [name, username, password, email], function(error, results, fields) {
-			if (error) throw error;
-			if (results.length <= 0) {
-				CheckPasswordPattern(password); // 비밀번호 생성 규칙 검사 함수
-        connection.query('INSERT INTO user (name, username, password, email) VALUES(?,?,?,?)', [name, username, password, email],
-            function (error, data) {
-                if (error)
-                  console.log(error);
-                else
-                  console.log(data);
-        });
-			  response.send(username + ' Registered Successfully!<br><a href="/index">Home</a>'); // 회원가입 성공시 로그인된채로 메인화면 가야함 (추가예정)
-			} else {
-				response.send(username + ' 아이디는 이미 존재합니다 !<br><a href="/signup" target="_parent">Home</a>');
-			}
-			response.end();
-		});
-	} else {
-		response.send('Please enter User Information!');
-		response.end();
-	}
-});
+// app.post("/signup", function (request, response) {
+//   var name = request.body.name; // 이름
+//   var username = request.body.username; // ID
+//   var password = request.body.password; // 비밀번호
+//   var password2 = request.body.password2; //비밀번호 확인
+//   var email = request.body.email; // 이메일
+//   // 주소, 추가예정
+//   console.log(name, username, password, email);
+//   if (name && username && password && email) {
+//     connection.query(
+//       "SELECT * FROM user WHERE name = ? AND username = ? AND password = ? AND email = ?",
+//       [name, username, password, email],
+//       function (error, results, fields) {
+//         if (error) throw error;
+//         if (results.length <= 0) {
+//           CheckPasswordPattern(password); // 비밀번호 생성 규칙 검사 함수
+//           connection.query(
+//             "INSERT INTO user (name, username, password, email) VALUES(?,?,?,?)",
+//             [name, username, password, email],
+//             function (error, data) {
+//               if (error) console.log(error);
+//               else console.log(data);
+//             }
+//           );
+//           response.send(username + ' Registered Successfully!<br><a href="/index">Home</a>'); // 회원가입 성공시 로그인된채로 메인화면 가야함 (추가예정)
+//         } else {
+//           response.send(
+//             username + ' 아이디는 이미 존재합니다 !<br><a href="/signup" target="_parent">Home</a>'
+//           );
+//         }
+//         response.end();
+//       }
+//     );
+//   } else {
+//     response.send("Please enter User Information!");
+//     response.end();
+//   }
+// });
 /*
 app.get('/logout', function(request, response) {
   request.session.loggedin = false;
@@ -143,6 +157,6 @@ app.get('/home', restrict, function(request, response) {
 	}
 });*/
 
-http.listen('3000', function () {
-    console.log('Server Start : http://127.0.0.1:3000');
+http.listen("3000", function () {
+  console.log("Server Start : http://127.0.0.1:3000");
 });
