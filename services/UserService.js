@@ -9,7 +9,8 @@ const createUser = (conn, fields) => {
 };
 
 const findUser = (conn, field) => {
-  return conn.query(`SELECT ${field} FROM users WHERE ${field} = ?`, [field]);
+  const [column] = Object.keys(field);
+  return conn.query(`SELECT ${column} FROM users WHERE ${column} = ?`, [field[column]]);
 };
 
 const passwordValidation = (password) => {

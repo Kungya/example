@@ -1,5 +1,6 @@
-import { UserService } from "../services/index.js";
 import pool from "../db/index.js";
+import UserService from "../services/UserService.js";
+import UserUtil from "../utils/UserUtil.js";
 
 const signUp = async (req, res, next) => {
   let conn;
@@ -25,21 +26,19 @@ const signUp = async (req, res, next) => {
       return res.status(400).json({ message: "이름을 입력하세요" });
     }
 
-    // const [emailExists] = await conn.query("SELECT email FROM users WHERE email = ?", [email]);
-
     const [emailExists] = await UserService.findUser(conn, { email });
 
     if (emailExists) {
       return res.status(409).json({ message: "이미 존재하는 이메일 입니다." });
     }
 
-    const [idExists] = await conn.query("SELECT id FROM users WHERE id = ?", [id]);
+    const [idExists] = await UserService.findUser(conn, { id });
 
     if (idExists) {
       return res.status(409).json({ message: "이미 존재하는 아이디 입니다." });
     }
 
-    if (!UserService.passwordValidation(password)) {
+    if (!UserUtil.passwordValidation(password)) {
       return res
         .status(400)
         .json({ message: "비밀번호는 영문, 숫자를 포함하여 8자 이상이어야 합니다." });
