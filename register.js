@@ -2,9 +2,10 @@ const mysql2 = require("mysql2/promise");
 
 const pool = mysql2.createPool({
   host: "localhost",
-  user: "tester",
-  password: "tester7",
+  user: "daphne",
+  password: "daphne1234!",
   database: "main",
+  connectionLimit: 1,
 });
 
 const signUp = async (req, res) => {
@@ -34,6 +35,12 @@ const signUp = async (req, res) => {
     const [emailExists] = await connection.query("SELECT email FROM users WHERE email = ?", [
       email,
     ]);
+
+    // const emailExists = await findOne(
+    //   "SELECT email FROM users WHERE email = ?",
+    //   [email],
+    //   connection
+    // );
 
     if (emailExists.length !== 0) {
       return res.status(409).json({ message: "이미 존재하는 이메일 입니다." });
@@ -73,6 +80,17 @@ const passwordValidation = (password) => {
     return false;
   } else {
     return true;
+  }
+};
+
+const findOne = async (query, data, connection) => {
+  try {
+    const [result] = await connection.query(query, [...data]);
+    return result;
+  } catch (error) {
+    console.error(error);
+  } finally {
+    connection.release();
   }
 };
 

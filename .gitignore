@@ -1,5 +1,5 @@
 # 노드 모듈 
-/node_modules
+node_modules/
 
 # 설정 파일
 .env.dev

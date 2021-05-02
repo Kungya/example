@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  db:
+    image: mariadb
+    container_name: mariadb_container
+    environment:
+      - MYSQL_ROOT_PASSWORD=tester7
+      - MYSQL_USER=tester
+      - MYSQL_PASSWORD=tester7
+      - MYSQL_DATABASE=main
+      - TZ=Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - "../../data/mariadb:/var/lib/mysql"
+    ports:
+      - "3306:3306"
